@@ -6,6 +6,8 @@ import 'package:firebase_ui_auth/firebase_ui_auth.dart' as ui_auth;
 import 'package:firebase_ui_oauth_google/firebase_ui_oauth_google.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+// import 'package:flutter_launcher_icons/web/web_template.dart';
+import 'package:on_popup_window_widget/on_popup_window_widget.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,7 +17,6 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -59,13 +60,14 @@ class _HomePageState extends State<HomePage> {
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _idController = TextEditingController();
 
+  User? _user;
   String? _upiQrData;
 
   /// Fetch UPI ID from Firestore (document: config/upi)
   Future<void> fetchUPIIdFromFirestore() async {
     try {
       final snapshot =
-          await FirebaseFirestore.instance.doc('config/upi').get();
+          await FirebaseFirestore.instance.doc('upi_users/${_user?.uid}').get();
       final upiId = snapshot.data()?['upi_id'];
       if (upiId != null && upiId is String) {
         _idController.text = upiId;
@@ -82,8 +84,7 @@ class _HomePageState extends State<HomePage> {
     final amount = _amountController.text.trim();
 
     if (id.isNotEmpty) {
-      _upiQrData =
-          'upi://pay?pa=$id&pn=${Uri.encodeComponent("Rohan Batra")}&cu=INR';
+      _upiQrData = 'upi://pay?pa=$id&cu=INR';
 
       if (amount.isNotEmpty) {
         _upiQrData = '$_upiQrData&am=$amount';
@@ -96,13 +97,21 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    _user = FirebaseAuth.instance.currentUser;
+    if (_user == null) {
+      // If user is not logged in, redirect to sign-in screen
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Unable to fetch user data. Please sign in again.'),
+        ),
+      );
+    }
     fetchUPIIdFromFirestore();
   }
 
+  bool _isPopUP = true;
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('UPI QR Generator'),
@@ -115,59 +124,152 @@ class _HomePageState extends State<HomePage> {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Text('Welcome, ${user?.email ?? 'User'}'),
-            const SizedBox(height: 20),
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 400),
-              child: _upiQrData != null
-                  ? QrImageView(
-                      key: ValueKey(_upiQrData),
-                      data: _upiQrData!,
-                      size: 250,
-                      backgroundColor:Colors.white,
-                      // foregroundColor: Colors.black,
-                      version: QrVersions.auto,
-                      dataModuleStyle: QrDataModuleStyle(
-                        color:const Color.fromARGB(255, 148, 20, 20),
-                        dataModuleShape: QrDataModuleShape.circle,
-                      ),
-                    )
-                  : const SizedBox(
-                      key: ValueKey('placeholder'),
-                      height: 250,
-                    ),
-            ),
-            const SizedBox(height: 30),
-            TextField(
-              controller: _amountController,
-              keyboardType: TextInputType.number,
-              onChanged: (value) => _updateQrCode(),
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Amount',
-                prefixIcon: Icon(Icons.currency_rupee),
+        child: Center(
+          child: _isPopUP? OnPopupWindowWidget(
+            child:Icon(Icons.currency_rupee_sharp, size: 50, color: Colors.red),
+          ):Column(
+            children: [
+              Text('Welcome, ${_user?.email ?? 'User'}'),
+              const SizedBox(height: 20),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 400),
+                child:
+                    _upiQrData != null
+                        ? QrImageView(
+                          key: ValueKey(_upiQrData),
+                          data: _upiQrData!,
+                          size: 250,
+                          backgroundColor: Colors.white,
+                          // foregroundColor: Colors.black,
+                          version: QrVersions.auto,
+                          dataModuleStyle: QrDataModuleStyle(
+                            color: const Color.fromARGB(255, 148, 20, 20),
+                            dataModuleShape: QrDataModuleShape.circle,
+                          ),
+                        )
+                        : const SizedBox(
+                          key: ValueKey('placeholder'),
+                          height: 250,
+                        ),
               ),
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: _idController,
-              onChanged: (value) async {
-                _updateQrCode();
-                await FirebaseFirestore.instance
-                    .doc("config/upi")
-                    .set({'upi_id': value});
-              },
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'UPI ID (e.g., rohan@upi)',
-                prefixIcon: Icon(Icons.account_balance_wallet),
+              const SizedBox(height: 30),
+              TextField(
+                controller: _amountController,
+                keyboardType: TextInputType.number,
+                onChanged: (value) => _updateQrCode(),
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Amount',
+                  prefixIcon: Icon(Icons.currency_rupee),
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: 20),
+              TextField(
+                controller: _idController,
+                onChanged: (value) async {
+                  _updateQrCode();
+                  await FirebaseFirestore.instance
+                      .doc('upi_users/${_user?.uid}')
+                      .set({'upi_id': value});
+                },
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'UPI ID (e.g., rohan@upi)',
+                  prefixIcon: Icon(Icons.account_balance_wallet),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
+  @override
+  @override
+Widget build1(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: const Text('UPI QR Generator'),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.logout),
+          onPressed: () => FirebaseAuth.instance.signOut(),
+        ),
+      ],
+    ),
+    body: Stack(
+      children: [
+        // Background main content
+        SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              Text('Welcome, ${_user?.email ?? 'User'}'),
+              const SizedBox(height: 20),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 400),
+                child: _upiQrData != null
+                    ? QrImageView(
+                        key: ValueKey(_upiQrData),
+                        data: _upiQrData!,
+                        size: 250,
+                        backgroundColor: Colors.white,
+                        version: QrVersions.auto,
+                        dataModuleStyle: QrDataModuleStyle(
+                          color: const Color.fromARGB(255, 148, 20, 20),
+                          dataModuleShape: QrDataModuleShape.circle,
+                        ),
+                      )
+                    : const SizedBox(
+                        key: ValueKey('placeholder'),
+                        height: 250,
+                      ),
+              ),
+              const SizedBox(height: 30),
+              TextField(
+                controller: _amountController,
+                keyboardType: TextInputType.number,
+                onChanged: (value) => _updateQrCode(),
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Amount',
+                  prefixIcon: Icon(Icons.currency_rupee),
+                ),
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                controller: _idController,
+                onChanged: (value) async {
+                  _updateQrCode();
+                  await FirebaseFirestore.instance
+                      .doc('upi_users/${_user?.uid}')
+                      .set({'upi_id': value});
+                },
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'UPI ID (e.g., rohan@upi)',
+                  prefixIcon: Icon(Icons.account_balance_wallet),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    _isPopUP = !_isPopUP;
+                  });
+                },
+                child: Text("Update popup to ${_isPopUP ? 'Hide' : 'Show'}"),
+              ),
+            ],
+          ),
+        ),
+
+        // Floating Popup Icon (visible on top)
+        if (_isPopUP)OnPopupWindowWidget(
+              mainWindowAlignment: Alignment.center,
+              child: Icon(Icons.currency_rupee_sharp, size: 50, color: Colors.red),
+            ),
+      ],
+    ),
+  );
+}
 }
