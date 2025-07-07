@@ -6,8 +6,6 @@ import 'package:firebase_ui_auth/firebase_ui_auth.dart' as ui_auth;
 import 'package:firebase_ui_oauth_google/firebase_ui_oauth_google.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-// import 'package:flutter_launcher_icons/web/web_template.dart';
-import 'package:on_popup_window_widget/on_popup_window_widget.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -109,7 +107,6 @@ class _HomePageState extends State<HomePage> {
     fetchUPIIdFromFirestore();
   }
 
-  bool _isPopUP = true;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -125,9 +122,7 @@ class _HomePageState extends State<HomePage> {
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Center(
-          child: _isPopUP? OnPopupWindowWidget(
-            child:Icon(Icons.currency_rupee_sharp, size: 50, color: Colors.red),
-          ):Column(
+          child: Column(
             children: [
               Text('Welcome, ${_user?.email ?? 'User'}'),
               const SizedBox(height: 20),
@@ -184,92 +179,4 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-  @override
-  @override
-Widget build1(BuildContext context) {
-  return Scaffold(
-    appBar: AppBar(
-      title: const Text('UPI QR Generator'),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.logout),
-          onPressed: () => FirebaseAuth.instance.signOut(),
-        ),
-      ],
-    ),
-    body: Stack(
-      children: [
-        // Background main content
-        SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              Text('Welcome, ${_user?.email ?? 'User'}'),
-              const SizedBox(height: 20),
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 400),
-                child: _upiQrData != null
-                    ? QrImageView(
-                        key: ValueKey(_upiQrData),
-                        data: _upiQrData!,
-                        size: 250,
-                        backgroundColor: Colors.white,
-                        version: QrVersions.auto,
-                        dataModuleStyle: QrDataModuleStyle(
-                          color: const Color.fromARGB(255, 148, 20, 20),
-                          dataModuleShape: QrDataModuleShape.circle,
-                        ),
-                      )
-                    : const SizedBox(
-                        key: ValueKey('placeholder'),
-                        height: 250,
-                      ),
-              ),
-              const SizedBox(height: 30),
-              TextField(
-                controller: _amountController,
-                keyboardType: TextInputType.number,
-                onChanged: (value) => _updateQrCode(),
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Amount',
-                  prefixIcon: Icon(Icons.currency_rupee),
-                ),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _idController,
-                onChanged: (value) async {
-                  _updateQrCode();
-                  await FirebaseFirestore.instance
-                      .doc('upi_users/${_user?.uid}')
-                      .set({'upi_id': value});
-                },
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'UPI ID (e.g., rohan@upi)',
-                  prefixIcon: Icon(Icons.account_balance_wallet),
-                ),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    _isPopUP = !_isPopUP;
-                  });
-                },
-                child: Text("Update popup to ${_isPopUP ? 'Hide' : 'Show'}"),
-              ),
-            ],
-          ),
-        ),
-
-        // Floating Popup Icon (visible on top)
-        if (_isPopUP)OnPopupWindowWidget(
-              mainWindowAlignment: Alignment.center,
-              child: Icon(Icons.currency_rupee_sharp, size: 50, color: Colors.red),
-            ),
-      ],
-    ),
-  );
-}
 }
