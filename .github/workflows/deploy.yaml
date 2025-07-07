@@ -12,14 +12,16 @@ jobs:
     steps:
       - name: Checkout source repo
         uses: actions/checkout@v3
-      - name: Disable analytics and enable Flutter
-        run: |
-          flutter config --no-analytics
-          flutter config --no-cli-animations
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.19.0'
+
+      - name: Disable analytics and CLI animations
+        run: |
+          flutter config --no-analytics
+          flutter config --no-cli-animations
 
       - name: Install dependencies
         run: flutter pub get
@@ -32,7 +34,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           git config --global user.name "Rohan Batra"
-          git config --global user.email "your-email@example.com"
+          git config --global user.email "rohanbatra.in@gmail.com"
 
           git clone https://x-access-token:${GH_TOKEN}@github.com/MrRohanBatra/MrRohanBatra.github.io.git
 
