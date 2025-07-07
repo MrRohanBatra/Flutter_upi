@@ -1,0 +1,41 @@
+name: Deploy to GitHub Pages Repo
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source repo
+        uses: actions/checkout@v3
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.0'  # your version
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Flutter web
+        run: flutter build web
+
+      - name: Push to MrRohanBatra.github.io repo
+        run: |
+          git config --global user.name "Rohan Batra"
+          git config --global user.email "your-email@example.com"
+
+          git clone https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/MrRohanBatra/MrRohanBatra.github.io.git
+          
+          rm -rf MrRohanBatra.github.io/UPI-QRCODE-MAKER
+          mkdir -p MrRohanBatra.github.io/UPI-QRCODE-MAKER
+          cp -r build/web/* MrRohanBatra.github.io/UPI-QRCODE-MAKER/
+
+          cd MrRohanBatra.github.io
+          git add .
+          git commit -m "Auto-deploy UPI QR build to Upi_maker"
+          git push

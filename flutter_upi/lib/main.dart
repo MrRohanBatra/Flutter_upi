@@ -6,6 +6,9 @@ import 'package:firebase_ui_auth/firebase_ui_auth.dart' as ui_auth;
 import 'package:firebase_ui_oauth_google/firebase_ui_oauth_google.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:on_popup_window_widget/on_popup_window_widget.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -92,8 +95,69 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<String> getAppVersion() async {
+    final packageInfo = await PackageInfo.fromPlatform();
+    return packageInfo.version;
+  }
+
+  Future<String> getWhatsNew() async {
+    String? data;
+    final snapshot =
+        await FirebaseFirestore.instance.doc('app_config/whats_new').get();
+    if (snapshot.exists && snapshot.data() != null) {
+      data = snapshot.data()?['content'] ?? 'Contact Developer for updates';
+    } else {
+      data = 'Contact Developer for updates';
+    }
+    setState(() {
+      _content = data;
+    });
+    return data!;
+  }
+
+  Future<String> getFirestoreVersion() async {
+    try {
+      final snapshot =
+          await FirebaseFirestore.instance.doc('config/app_version').get();
+      return snapshot.data()?['version'] ?? 'Unknown';
+    } catch (e) {
+      debugPrint("Error fetching Firestore version: $e");
+      return 'Unknown';
+    }
+  }
+
+  Future<void> check() async {
+    final localVersion = await getAppVersion();
+    final firestoreVersion = await getFirestoreVersion();
+    final data = await getSharedPrefData();
+    bool data_bool = false;
+    if (localVersion != firestoreVersion) {
+      data_bool = true;
+    } else if (localVersion == firestoreVersion && data == true) {
+      data_bool = false;
+    } else if (localVersion == firestoreVersion && data == false) {
+      data_bool = true;
+    }
+    setState(() {
+      _toShow = data_bool;
+    });
+  }
+
+  void setVersion() async {
+    final instance = await SharedPreferences.getInstance();
+    await instance.setBool("shown", true);
+  }
+
+  Future<bool> getSharedPrefData() async {
+    final instance = await SharedPreferences.getInstance();
+    final data = await instance.getBool("shown") ?? false;
+    print(data);
+    return data;
+  }
+
+  String? _content;
   @override
-  void initState() {
+  void initState_og() {
     super.initState();
     _user = FirebaseAuth.instance.currentUser;
     if (_user == null) {
@@ -108,6 +172,17 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _user = FirebaseAuth.instance.currentUser;
+    fetchUPIIdFromFirestore();
+    getWhatsNew(); // fetch what's new content
+    check(); //
+    // _toShow = true;
+  }
+
+  bool _toShow = false;
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -119,63 +194,106 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Center(
-          child: Column(
-            children: [
-              Text('Welcome, ${_user?.email ?? 'User'}'),
-              const SizedBox(height: 20),
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 400),
-                child:
-                    _upiQrData != null
-                        ? QrImageView(
-                          key: ValueKey(_upiQrData),
-                          data: _upiQrData!,
-                          size: 250,
-                          backgroundColor: Colors.white,
-                          // foregroundColor: Colors.black,
-                          version: QrVersions.auto,
-                          dataModuleStyle: QrDataModuleStyle(
-                            color: const Color.fromARGB(255, 148, 20, 20),
-                            dataModuleShape: QrDataModuleShape.circle,
-                          ),
-                        )
-                        : const SizedBox(
-                          key: ValueKey('placeholder'),
-                          height: 250,
-                        ),
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Center(
+              child: Column(
+                children: [
+                  Text(
+                    'Welcome, ${_user?.displayName?.isNotEmpty == true ? _user!.displayName : (_user?.email ?? 'User')}',
+                  ),
+                  const SizedBox(height: 20),
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 400),
+                    child:
+                        _upiQrData != null
+                            ? QrImageView(
+                              key: ValueKey(_upiQrData),
+                              data: _upiQrData!,
+                              size: 250,
+                              backgroundColor: Colors.white,
+                              version: QrVersions.auto,
+                              dataModuleStyle: QrDataModuleStyle(
+                                color: const Color.fromARGB(255, 148, 20, 20),
+                                dataModuleShape: QrDataModuleShape.circle,
+                              ),
+                            )
+                            : const SizedBox(
+                              key: ValueKey('placeholder'),
+                              height: 250,
+                            ),
+                  ),
+                  const SizedBox(height: 30),
+                  TextField(
+                    controller: _amountController,
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) => _updateQrCode(),
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Amount',
+                      prefixIcon: Icon(Icons.currency_rupee),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  TextField(
+                    controller: _idController,
+                    onChanged: (value) async {
+                      _updateQrCode();
+                      await FirebaseFirestore.instance
+                          .doc('upi_users/${_user?.uid}')
+                          .set({'upi_id': value});
+                    },
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'UPI ID (e.g., rohan@upi)',
+                      prefixIcon: Icon(Icons.account_balance_wallet),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 30),
-              TextField(
-                controller: _amountController,
-                keyboardType: TextInputType.number,
-                onChanged: (value) => _updateQrCode(),
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Amount',
-                  prefixIcon: Icon(Icons.currency_rupee),
-                ),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _idController,
-                onChanged: (value) async {
-                  _updateQrCode();
-                  await FirebaseFirestore.instance
-                      .doc('upi_users/${_user?.uid}')
-                      .set({'upi_id': value});
-                },
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'UPI ID (e.g., rohan@upi)',
-                  prefixIcon: Icon(Icons.account_balance_wallet),
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
+          if (_toShow)
+            Positioned.fill(
+              child: Container(
+                color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.1), // dim background
+                alignment: Alignment.center,
+                child: OnPopupWindowWidget.widgetMode(
+                  mainWindowAlignment: Alignment.center,
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "What's New",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _toShow = false;
+                            setVersion();
+                          });
+                        },
+                        icon: const Icon(Icons.close),
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text(
+                      _content ?? "Loading update details...",
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
