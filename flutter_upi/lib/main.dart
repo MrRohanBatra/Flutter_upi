@@ -141,7 +141,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> check() async {
     final localVersion = await getAppVersion();
     setState(() {
-      _local=localVersion;
+      _local = localVersion;
     });
     final firestoreVersion = await getFirestoreVersion();
     final data = await getSharedPrefData();
@@ -209,122 +209,138 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Center(
-              child: Column(
-                children: [
-                  Text(
-                    'Welcome, ${_user?.displayName?.isNotEmpty == true ? _user!.displayName : (_user?.email ?? 'User')}',
-                  ),
-                  const SizedBox(height: 20),
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 400),
-                    child:
-                        _upiQrData != null
-                            ? QrImageView(
-                              key: ValueKey(_upiQrData),
-                              data: _upiQrData!,
-                              size: 250,
-                              backgroundColor: Colors.white,
-                              version: QrVersions.auto,
-                              dataModuleStyle: QrDataModuleStyle(
-                                color: const Color.fromARGB(255, 148, 20, 20),
-                                dataModuleShape: QrDataModuleShape.circle,
-                              ),
-                            )
-                            : const SizedBox(
-                              key: ValueKey('placeholder'),
-                              height: 250,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: Center(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Welcome, ${_user?.displayName?.isNotEmpty == true ? _user!.displayName : (_user?.email ?? 'User')}',
+                          ),
+                          const SizedBox(height: 20),
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 400),
+                            child:
+                                _upiQrData != null
+                                    ? QrImageView(
+                                      key: ValueKey(_upiQrData),
+                                      data: _upiQrData!,
+                                      size: 250,
+                                      backgroundColor: Colors.white,
+                                      version: QrVersions.auto,
+                                      dataModuleStyle: QrDataModuleStyle(
+                                        color: const Color.fromARGB(
+                                          255,
+                                          148,
+                                          20,
+                                          20,
+                                        ),
+                                        dataModuleShape:
+                                            QrDataModuleShape.circle,
+                                      ),
+                                    )
+                                    : const SizedBox(
+                                      key: ValueKey('placeholder'),
+                                      height: 250,
+                                    ),
+                          ),
+                          const SizedBox(height: 30),
+                          TextField(
+                            controller: _amountController,
+                            keyboardType: TextInputType.number,
+                            onChanged: (value) => _updateQrCode(),
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              labelText: 'Amount',
+                              prefixIcon: Icon(Icons.currency_rupee),
                             ),
-                  ),
-                  const SizedBox(height: 30),
-                  TextField(
-                    controller: _amountController,
-                    keyboardType: TextInputType.number,
-                    onChanged: (value) => _updateQrCode(),
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Amount',
-                      prefixIcon: Icon(Icons.currency_rupee),
+                          ),
+                          const SizedBox(height: 20),
+                          TextField(
+                            controller: _idController,
+                            onChanged: (value) async {
+                              _updateQrCode();
+                              await FirebaseFirestore.instance
+                                  .doc('upi_users/${_user?.uid}')
+                                  .set({'upi_id': value});
+                            },
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              labelText: 'UPI ID (e.g., rohan@upi)',
+                              prefixIcon: Icon(Icons.account_balance_wallet),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  TextField(
-                    controller: _idController,
-                    onChanged: (value) async {
-                      _updateQrCode();
-                      await FirebaseFirestore.instance
-                          .doc('upi_users/${_user?.uid}')
-                          .set({'upi_id': value});
-                    },
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'UPI ID (e.g., rohan@upi)',
-                      prefixIcon: Icon(Icons.account_balance_wallet),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 16, bottom: 8),
+                  child: Align(
+                    alignment: Alignment.bottomLeft,
+                    child: Text(
+                      "Version: ${_local ?? ''}",
+                      style: const TextStyle(color: Colors.redAccent),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ),
-          if (_toShow)
-            Positioned.fill(
-              child: Container(
-                color: Theme.of(
-                  context,
-                ).scaffoldBackgroundColor.withOpacity(0.8), // dim background
-                alignment: Alignment.center,
-                child: OnPopupWindowWidget.widgetMode(
-                  mainWindowAlignment: Alignment.center,
-                  title: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      SizedBox(
-                        width: 200,
-                        child: const Text(
-                          "What's New",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+
+            // Popup Overlay
+            if (_toShow)
+              Positioned.fill(
+                child: Container(
+                  color: Theme.of(
+                    context,
+                  ).scaffoldBackgroundColor.withOpacity(0.8),
+                  alignment: Alignment.center,
+                  child: OnPopupWindowWidget.widgetMode(
+                    mainWindowAlignment: Alignment.center,
+                    title: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const SizedBox(
+                          width: 200,
+                          child: Text(
+                            "What's New",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
+                        IconButton(
+                          onPressed: () async {
+                            await setSharedPrefs();
+                            setState(() {
+                              _toShow = false;
+                            });
+                          },
+                          icon: const Icon(Icons.close),
+                        ),
+                      ],
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                        _content ?? "Loading update details...",
+                        style: const TextStyle(fontSize: 16),
                       ),
-                      IconButton(
-                        onPressed: () async {
-                          await setSharedPrefs();
-                          setState(() {
-                            _toShow = false;
-                            print("_toShow changed to : ${_toShow}");
-                          });
-                        },
-                        icon: const Icon(Icons.close),
-                      ),
-                    ],
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                      _content ?? "Loading update details...",
-                      style: const TextStyle(fontSize: 16),
                     ),
                   ),
                 ),
               ),
-            ),
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Align(
-              alignment: Alignment.bottomLeft,
-              child: Text("Version: ${_local}",
-              style: TextStyle(
-                color: Colors.redAccent,
-              ),),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
