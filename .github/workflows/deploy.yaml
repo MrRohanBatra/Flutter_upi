@@ -38,18 +38,27 @@ jobs:
 
     - name: Build Flutter Web (Release) with base href as ./
       working-directory: flutter_upi
-      run: flutter build web --release --base-href="/UPI-QR-MAKER/"
+      run: flutter build web --release ##--base-href="/UPI-QR-MAKER/"
 
     - name: Clone GitHub Pages Repo (mrrohanbatra.github.io)
       run: |
         git clone https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/MrRohanBatra/mrrohanbatra.github.io.git pages_repo
         ls pages_repo
-
     - name: Copy Build Output to pages_repo/UPI-QRCODE-MAKER
       run: |
         rm -rf pages_repo/UPI-QRCODE-MAKER
         mkdir -p pages_repo/UPI-QRCODE-MAKER
         cp -r flutter_upi/build/web/* pages_repo/UPI-QRCODE-MAKER/
+        mkdir -p flutter_upi/UPI-QR-MAKER
+        cp -r flutter_upi/build/web/* flutter_upi/UPI-QR-MAKER/
+
+    - name: Commit and Push Build to Main Repo (flutter_upi)
+      run: |
+        git config user.name "Rohan Batra"
+        git config user.email "rohanbatra.in@gmail.com"
+        git add flutter_upi/UPI-QR-MAKER
+        git commit -m "🛠️ Add web build output to main repo" || echo "No changes to commit"
+        git push
 
     - name: Commit and Push to GitHub Pages
       run: |
