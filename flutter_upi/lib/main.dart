@@ -9,7 +9,8 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:on_popup_window_widget/on_popup_window_widget.dart';
-//made some minor changes 
+
+//made some minor changes
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -23,7 +24,10 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'UPI QR App',
       theme: ThemeData(useMaterial3: true),
-      darkTheme: ThemeData.dark(useMaterial3: true),
+      darkTheme: ThemeData.from(
+        colorScheme: ColorScheme.dark(),
+        useMaterial3: true,
+      ),
       themeMode: ThemeMode.system,
       initialRoute: '/',
       routes: {
@@ -118,7 +122,7 @@ class _HomePageState extends State<HomePage> {
   Future<String> getFirestoreVersion() async {
     try {
       final snapshot =
-          await FirebaseFirestore.instance.doc('config/app_version').get();
+          await FirebaseFirestore.instance.doc('app_config/whats_new').get();
       return snapshot.data()?['version'] ?? 'Unknown';
     } catch (e) {
       debugPrint("Error fetching Firestore version: $e");
@@ -126,32 +130,55 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<void> setSharedPrefs() async {
+    final instance = await SharedPreferences.getInstance();
+    final uid = _user?.uid;
+    print("set ${uid}_shown to true");
+    instance.setBool("${uid}_shown", true);
+  }
+
+  String? _local;
   Future<void> check() async {
     final localVersion = await getAppVersion();
+    setState(() {
+      _local=localVersion;
+    });
     final firestoreVersion = await getFirestoreVersion();
     final data = await getSharedPrefData();
+    print("Local Version: $localVersion");
+    print("Firestore Version: $firestoreVersion");
+
     bool? data_bool;
     if (localVersion != firestoreVersion) {
+      print("local version and firebase version not same");
       data_bool = true;
     } else if (localVersion == firestoreVersion && data == true) {
       data_bool = false;
+      print(
+        "local ,firebase version same and data is true\nsetting data_bool to ${data_bool}",
+      );
     } else if (localVersion == firestoreVersion && data == false) {
       data_bool = true;
+      print(
+        "local ,firebase version same and data is true\nsetting data_bool to ${data_bool}",
+      );
     }
     setState(() {
       _toShow = data_bool!;
+      print("_toShow changed to : ${_toShow}");
     });
-  }
-
-  void setVersion() async {
-    final instance = await SharedPreferences.getInstance();
-    await instance.setBool("shown", true);
   }
 
   Future<bool> getSharedPrefData() async {
     final instance = await SharedPreferences.getInstance();
-    final data = await instance.getBool("shown") ?? false;
-    print(data);
+    final String? uid = _user?.uid;
+
+    if (uid == null) {
+      return false;
+    }
+
+    final bool data = instance.getBool("${uid}_shown") ?? false;
+    print("shared prefs data fetched: ${data}");
     return data;
   }
 
@@ -160,7 +187,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _user = FirebaseAuth.instance.currentUser;
-    Future.microtask(()async {
+    Future.microtask(() async {
       await fetchUPIIdFromFirestore();
       await getWhatsNew(); // fetch what's new content
       await check();
@@ -169,7 +196,7 @@ class _HomePageState extends State<HomePage> {
     // _toShow = true;
   }
 
-  bool _toShow = true;
+  bool _toShow = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -248,25 +275,29 @@ class _HomePageState extends State<HomePage> {
               child: Container(
                 color: Theme.of(
                   context,
-                ).scaffoldBackgroundColor.withOpacity(0.1), // dim background
+                ).scaffoldBackgroundColor.withOpacity(0.8), // dim background
                 alignment: Alignment.center,
                 child: OnPopupWindowWidget.widgetMode(
                   mainWindowAlignment: Alignment.center,
                   title: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        "What's New",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                      SizedBox(
+                        width: 200,
+                        child: const Text(
+                          "What's New",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                       IconButton(
-                        onPressed: () {
+                        onPressed: () async {
+                          await setSharedPrefs();
                           setState(() {
                             _toShow = false;
-                            setVersion();
+                            print("_toShow changed to : ${_toShow}");
                           });
                         },
                         icon: const Icon(Icons.close),
@@ -283,6 +314,16 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Align(
+              alignment: Alignment.bottomLeft,
+              child: Text("Version: ${_local}",
+              style: TextStyle(
+                color: Colors.redAccent,
+              ),),
+            ),
+          ),
         ],
       ),
     );
