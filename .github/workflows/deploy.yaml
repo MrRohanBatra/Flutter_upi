@@ -1,11 +1,8 @@
 name: Build and Deploy Flutter Web to GitHub Pages at UPI-QR-MAKER
 
 on:
-  workflow_dispatch:
   push:
     branches: [main]
-    paths:
-      - 'flutter_upi/**'
 
 jobs:
   build_and_deploy:
@@ -43,7 +40,7 @@ jobs:
         git add UPI-QR-MAKER
         git commit -m "🛠️ Add Flutter Web build to UPI-QR-MAKER folder" || echo "No changes to commit"
         git push https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/MrRohanBatra/flutter_upi.git HEAD:main
-        
+
     - name: Clone GitHub Pages Repo (mrrohanbatra.github.io)
       run: |
         git clone https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/MrRohanBatra/mrrohanbatra.github.io.git pages_repo
