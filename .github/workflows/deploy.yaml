@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]  # or your working branch
     paths:
-      - 'flutter_upi/**'  # Only trigger on changes in flutter_upi
+      - 'flutter_upi/**'
 
 jobs:
   build_and_deploy:
@@ -18,6 +18,16 @@ jobs:
       uses: subosito/flutter-action@v2
       with:
         flutter-version: "3.22.1"
+        channel: "stable"
+
+    - name: Upgrade Flutter (optional but recommended)
+      run: flutter upgrade
+
+    - name: Check Flutter Version
+      run: flutter --version
+
+    - name: Check Dart Version
+      run: dart --version
 
     - name: Enable Web Support
       run: flutter config --enable-web
