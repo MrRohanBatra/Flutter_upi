@@ -1,11 +1,11 @@
 {
-    "name": "flutter_upi",
-    "short_name": "flutter_upi",
+    "name": "UPI QR MAKER",
+    "short_name": "upi-qr-maker",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "A new Flutter project which dynamically creates upi qr codes and implements usage of firebase.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

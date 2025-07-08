@@ -38,7 +38,7 @@ jobs:
 
     - name: Build Flutter Web (Release) with base href as ./
       working-directory: flutter_upi
-      run: flutter build web --release --base-href=./
+      run: flutter build web --release --base-href="/UPI-QR-MAKER/"
 
     - name: Clone GitHub Pages Repo (mrrohanbatra.github.io)
       run: |
