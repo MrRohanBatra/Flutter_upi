@@ -210,6 +210,7 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       body: SafeArea(
+        top: false,
         child: Stack(
           children: [
             Column(
