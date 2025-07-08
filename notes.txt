@@ -1,0 +1,9 @@
+//FLUTTER_UPI the root dir of the git repo
+//subfolder flutter_upi which has the flutter codebase and all files like lib,build,pubspec.yaml etc
+//give me a code for github workflow to build the web build (release version  and base href as ./)of the project in flutter_upi folder and automatically copy all the folders and index.html to UPI-QRCODE-MAKER ifolder in the repo
+//clone the mrrohanbatra.github.io repo in the Folder UPI-QRCODE-MAKER folder also copy all the contents of web build so that it can be deployed on github pages 
+
+
+//name  Rohan Batra
+//token in secrets as GH_TOKEN
+//email rohanbatra.in@gmail.com

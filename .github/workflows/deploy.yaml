@@ -1,48 +1,51 @@
-name: Deploy to GitHub Pages Repo
+name: Build and Deploy Flutter Web to GitHub Pages
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]  # or your working branch
+    paths:
+      - 'flutter_upi/**'  # Only trigger on changes in flutter_upi
 
 jobs:
-  deploy:
+  build_and_deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout source repo
-        uses: actions/checkout@v3
+    - name: Checkout this repository
+      uses: actions/checkout@v4
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.19.0'
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: "3.22.1"
 
-      - name: Disable analytics and CLI animations
-        run: |
-          flutter config --no-analytics
-          flutter config --no-cli-animations
+    - name: Enable Web Support
+      run: flutter config --enable-web
 
-      - name: Install dependencies
-        run: flutter pub get
+    - name: Install dependencies
+      working-directory: flutter_upi
+      run: flutter pub get
 
-      - name: Build Flutter web
-        run: flutter build web
+    - name: Build Flutter Web (Release) with base href as ./
+      working-directory: flutter_upi
+      run: flutter build web --release --base-href=./
 
-      - name: Push to MrRohanBatra.github.io repo
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          git config --global user.name "Rohan Batra"
-          git config --global user.email "rohanbatra.in@gmail.com"
+    - name: Clone GitHub Pages Repo (mrrohanbatra.github.io)
+      run: |
+        git clone https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/MrRohanBatra/mrrohanbatra.github.io.git pages_repo
+        ls pages_repo
 
-          git clone https://x-access-token:${GH_TOKEN}@github.com/MrRohanBatra/MrRohanBatra.github.io.git
+    - name: Copy Build Output to pages_repo/UPI-QRCODE-MAKER
+      run: |
+        rm -rf pages_repo/UPI-QRCODE-MAKER
+        mkdir -p pages_repo/UPI-QRCODE-MAKER
+        cp -r flutter_upi/build/web/* pages_repo/UPI-QRCODE-MAKER/
 
-          rm -rf MrRohanBatra.github.io/UPI-QRCODE-MAKER
-          mkdir -p MrRohanBatra.github.io/UPI-QRCODE-MAKER
-          cp -r build/web/* MrRohanBatra.github.io/UPI-QRCODE-MAKER/
-
-          cd MrRohanBatra.github.io
-          git add .
-          git commit -m "Auto-deploy UPI QR build to UPI-QRCODE-MAKER"
-          git push
+    - name: Commit and Push to GitHub Pages
+      run: |
+        cd pages_repo
+        git config user.name "Rohan Batra"
+        git config user.email "rohanbatra.in@gmail.com"
+        git add .
+        git commit -m "🚀 Deploy Flutter Web build to GitHub Pages" || echo "No changes to commit"
+        git push

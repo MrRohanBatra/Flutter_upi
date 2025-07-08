@@ -130,7 +130,7 @@ class _HomePageState extends State<HomePage> {
     final localVersion = await getAppVersion();
     final firestoreVersion = await getFirestoreVersion();
     final data = await getSharedPrefData();
-    bool data_bool = false;
+    bool? data_bool;
     if (localVersion != firestoreVersion) {
       data_bool = true;
     } else if (localVersion == firestoreVersion && data == true) {
@@ -139,7 +139,7 @@ class _HomePageState extends State<HomePage> {
       data_bool = true;
     }
     setState(() {
-      _toShow = data_bool;
+      _toShow = data_bool!;
     });
   }
 
@@ -157,31 +157,19 @@ class _HomePageState extends State<HomePage> {
 
   String? _content;
   @override
-  void initState_og() {
-    super.initState();
-    _user = FirebaseAuth.instance.currentUser;
-    if (_user == null) {
-      // If user is not logged in, redirect to sign-in screen
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Unable to fetch user data. Please sign in again.'),
-        ),
-      );
-    }
-    fetchUPIIdFromFirestore();
-  }
-
-  @override
   void initState() {
     super.initState();
     _user = FirebaseAuth.instance.currentUser;
-    fetchUPIIdFromFirestore();
-    getWhatsNew(); // fetch what's new content
-    check(); //
+    Future.microtask(()async {
+      await fetchUPIIdFromFirestore();
+      await getWhatsNew(); // fetch what's new content
+      await check();
+    });
+    //
     // _toShow = true;
   }
 
-  bool _toShow = false;
+  bool _toShow = true;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -258,7 +246,9 @@ class _HomePageState extends State<HomePage> {
           if (_toShow)
             Positioned.fill(
               child: Container(
-                color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.1), // dim background
+                color: Theme.of(
+                  context,
+                ).scaffoldBackgroundColor.withOpacity(0.1), // dim background
                 alignment: Alignment.center,
                 child: OnPopupWindowWidget.widgetMode(
                   mainWindowAlignment: Alignment.center,
