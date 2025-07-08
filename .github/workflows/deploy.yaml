@@ -1,4 +1,4 @@
-name: Build and Deploy Flutter Web to GitHub Pages
+name: Build and Deploy Flutter Web to GitHub Pages at UPI-QR-MAKER
 
 on:
   push:
