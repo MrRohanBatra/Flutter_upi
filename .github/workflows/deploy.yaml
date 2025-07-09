@@ -44,7 +44,7 @@ jobs:
         git config user.name "Rohan Batra"
         git config user.email "rohanbatra.in@gmail.com"
         git add UPI-QR-MAKER
-        git commit -m "🛠️ Add Flutter Web build to UPI-QR-MAKER folder" || echo "No changes to commit"
+        git commit -m "🛠️ Add Flutter Web build to UPI-QR-MAKER folder [skip ci]" || echo "No changes to commit"
         git push https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/MrRohanBatra/flutter_upi.git HEAD:main
 
     - name: Clone GitHub Pages Repo (mrrohanbatra.github.io)
@@ -57,11 +57,12 @@ jobs:
         rm -rf pages_repo/UPI-QR-MAKER/*
         mkdir -p pages_repo/UPI-QR-MAKER
         cp -r og_repo/flutter_upi/build/web/* pages_repo/UPI-QR-MAKER
+
     - name: Commit and Push to GitHub Pages
       working-directory: pages_repo
       run: |
         git config user.name "Rohan Batra"
         git config user.email "rohanbatra.in@gmail.com"
         git add .
-       git commit -m "🛠️ Add Flutter Web build to UPI-QR-MAKER folder [skip ci]" || echo "No changes to commit"
-    git push
+        git commit -m "🛠️ Add Flutter Web build to UPI-QR-MAKER folder [skip ci]" || echo "No changes to commit"
+        git push
