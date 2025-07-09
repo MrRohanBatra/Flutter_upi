@@ -50,6 +50,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "276414625228-js1av070jc6tq9tuv65t4q0ukkotvg4p.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rohan.upi_qr_maker",
+            "certificate_hash": "78c9ae7d4c3f785ad3d2046ea8e29d2294ef6ae6"
+          }
+        },
+        {
           "client_id": "276414625228-9ov3av2egfh1uv643b3oe7k1p8dgc4hp.apps.googleusercontent.com",
           "client_type": 3
         }
