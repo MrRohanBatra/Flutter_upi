@@ -110,7 +110,17 @@ class _MainUI extends State<MainUI> {
       debugPrint("Error fetching UPI ID: $e");
     }
   }
-
+  Future<void> showWhatsNew(BuildContext context)async {
+    await showDialog(context: context, builder: (context)=>AlertDialog(
+      title: Text("🎉 What's New"),
+      content: Text(_content!),
+      actions: [
+        TextButton(onPressed: (){
+          Navigator.of(context).pop();
+        }, child: Text("Close"))
+      ],
+    ));
+  }
   /// Build UPI QR data
   void _updateQrCode() {
     final id = _idController.text.trim();
@@ -371,7 +381,7 @@ class _MainUI extends State<MainUI> {
               alignment: Alignment.bottomCenter,
               child: GestureDetector(
                 onTap: () async {
-                  final url = Uri.parse("https://raw.githubusercontent.com/MrRohanBatra/UPI-QRCODE-MAKER/refs/heads/main/app_release.apk");
+                  final url = Uri.parse("https://github.com/MrRohanBatra/UPI-QRCODE-MAKER/raw/refs/heads/main/UPI-QR-MAKER/android/app-release.apk");
                   if (await canLaunchUrl(url)) {
                     await launchUrl(url, mode: LaunchMode.externalApplication); // or LaunchMode.platformDefault
                   } else {
@@ -567,11 +577,21 @@ class _MainUI extends State<MainUI> {
                       ),
                       SizedBox(
                         width: 20,
-                      )
+                      ),
                     ],
                   ),
                 ),
-
+                const SizedBox(height: 20,),
+                GestureDetector(
+                  child: const Text("🎉 What's New",style: TextStyle(
+                    fontStyle: FontStyle.italic,
+                    fontWeight: FontWeight.bold,
+                    decoration: TextDecoration.underline
+                  ),),
+                  onTap: ()async{
+                    await showWhatsNew(context);
+                  },
+                ),
               ],
             ),
           ),

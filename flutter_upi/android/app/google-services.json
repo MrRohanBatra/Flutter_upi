@@ -12,7 +12,12 @@
           "package_name": "com.example.flutter_upi"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "276414625228-9ov3av2egfh1uv643b3oe7k1p8dgc4hp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAK_LDEYrO4MSdQzN5NT9DUmyoyQh4R90E"
@@ -20,7 +25,55 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "276414625228-9ov3av2egfh1uv643b3oe7k1p8dgc4hp.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "276414625228-tvbtu78g6dlalgovu06et5j7rbdvavg8.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.flutterUpi"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:276414625228:android:c730807ba624eecb5fd969",
+        "android_client_info": {
+          "package_name": "com.rohan.upi_qr_maker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "276414625228-9ov3av2egfh1uv643b3oe7k1p8dgc4hp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAK_LDEYrO4MSdQzN5NT9DUmyoyQh4R90E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "276414625228-9ov3av2egfh1uv643b3oe7k1p8dgc4hp.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "276414625228-tvbtu78g6dlalgovu06et5j7rbdvavg8.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.flutterUpi"
+              }
+            }
+          ]
         }
       }
     }
