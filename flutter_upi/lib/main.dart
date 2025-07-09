@@ -61,7 +61,7 @@ class MyApp extends StatelessWidget {
                     ui_auth.EmailAuthProvider(),
                     GoogleProvider(
                       clientId:
-                          '1:276414625228:web:aeb60f3a5b81716d5fd969.apps.googleusercontent.com',
+                          '9ov3av2egfh1uv643b3oe7k1p8dgc4hp.apps.googleusercontent.com',
                     ),
                   ],
                 );
