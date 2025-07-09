@@ -35,36 +35,42 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   qr_flutter: ^4.1.0
-  firebase_core: ^2.31.0
-  firebase_auth: ^4.17.4
+  firebase_core: ^3.15.1
+  firebase_auth: ^5.6.2
   firebase_ui_auth: ^1.14.0
   firebase_ui_oauth_google: ^1.2.15
-  cloud_firestore: ^4.13.4
+  cloud_firestore: ^5.6.11
   flutter_launcher_icons: ^0.14.4
   on_popup_window_widget: ^0.0.13
   package_info_plus: ^8.3.0
   shared_preferences: ^2.5.3
+  pretty_qr_code: ^3.4.0
+  image_picker: ^1.1.2
+  firebase_storage: ^12.4.9
+  flutter_initicon: ^3.0.1
+  font_awesome_flutter: ^10.8.0
+  url_launcher: ^6.3.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 flutter_launcher_icons:
-  image_path: "assets/icons/icon.webp"
+  image_path: "assets/icons/icon.png"
 
   android: true
   ios: true
 
   web:
     generate: true
-    image_path: "assets/icons/icon.webp"
+    image_path: "assets/icons/icon.png"
 
   macos:
     generate: true
-    image_path: "assets/icons/icon.webp"
+    image_path: "assets/icons/icon.png"
 
   windows:
     generate: true
-    image_path: "assets/icons/icon.webp"
+    image_path: "assets/icons/icon.png"
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
@@ -77,7 +83,8 @@ flutter_launcher_icons:
 
 # The following section is specific to Flutter packages.
 flutter:
-
+  assets:
+    - assets/icons/icon.png
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
