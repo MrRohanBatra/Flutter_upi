@@ -403,7 +403,7 @@ class _MainUI extends State<MainUI> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
 
                 /// 🔹 Logged-in User Info
                 const Text(
