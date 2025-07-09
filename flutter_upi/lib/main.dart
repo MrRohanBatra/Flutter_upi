@@ -18,12 +18,15 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_initicon/flutter_initicon.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
 Future<XFile?> pickImage() async {
   final ImagePicker picker = ImagePicker();
   return await picker.pickImage(source: ImageSource.gallery); // or camera
 }
+
 Future<String?> uploadProfileImage(XFile image, String uid) async {
-  final storageRef = FirebaseStorage.instance.ref().child("profile_images/$uid.jpg");
+  final storageRef =
+      FirebaseStorage.instance.ref().child("profile_images/$uid.jpg");
 
   final uploadTask = await storageRef.putData(await image.readAsBytes());
   final downloadUrl = await uploadTask.ref.getDownloadURL();
@@ -60,9 +63,7 @@ class MyApp extends StatelessWidget {
                   providers: [
                     ui_auth.EmailAuthProvider(),
                     GoogleProvider(
-                      clientId:
-                          '9ov3av2egfh1uv643b3oe7k1p8dgc4hp.apps.googleusercontent.com',
-                    ),
+                        clientId: " 1:276414625228:web:86087c54d32a99a15fd969"),
                   ],
                 );
               }
@@ -84,18 +85,19 @@ class MainUI extends StatefulWidget {
 class _MainUI extends State<MainUI> {
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _idController = TextEditingController();
-  final TextEditingController _nameController=TextEditingController();
-  final TextEditingController _passwordController=TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
   User? _user;
   String? _upiQrData;
   String? _local;
   String? _content;
   bool _toShow = false;
-  int _index=0;
+  int _index = 0;
   String? _username;
   String? _email;
   String? _uid;
+
   /// Fetch UPI ID from Firestore (document: config/upi)
   Future<void> fetchUPIIdFromFirestore() async {
     try {
@@ -110,17 +112,23 @@ class _MainUI extends State<MainUI> {
       debugPrint("Error fetching UPI ID: $e");
     }
   }
-  Future<void> showWhatsNew(BuildContext context)async {
-    await showDialog(context: context, builder: (context)=>AlertDialog(
-      title: Text("🎉 What's New"),
-      content: Text(_content!),
-      actions: [
-        TextButton(onPressed: (){
-          Navigator.of(context).pop();
-        }, child: Text("Close"))
-      ],
-    ));
+
+  Future<void> showWhatsNew(BuildContext context) async {
+    await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: Text("🎉 What's New"),
+              content: Text(_content!),
+              actions: [
+                TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text("Close"))
+              ],
+            ));
   }
+
   /// Build UPI QR data
   void _updateQrCode() {
     final id = _idController.text.trim();
@@ -204,21 +212,25 @@ class _MainUI extends State<MainUI> {
       print("_toShow changed to : ${_toShow}");
     });
   }
+
   String? getUsername() {
     if (_user?.displayName?.isNotEmpty == true) {
       return _user!.displayName;
     }
     return "User X";
   }
-  String? getEmail(){
-    if(_user?.email?.isNotEmpty==true){
+
+  String? getEmail() {
+    if (_user?.email?.isNotEmpty == true) {
       return _user!.email;
     }
     return "User_X@mail.com";
   }
+
   String? getUID() {
     return _user!.uid;
   }
+
   Future<bool> getSharedPrefData() async {
     final instance = await SharedPreferences.getInstance();
     final String? uid = _user?.uid;
@@ -231,27 +243,28 @@ class _MainUI extends State<MainUI> {
     print("shared prefs data fetched: ${data}");
     return data;
   }
+
   @override
   void initState() {
     super.initState();
     _user = FirebaseAuth.instance.currentUser;
     // _qrcode=QrCode.fromData(data: _upiQrData!, errorCorrectLevel:QrErrorCorrectLevel.H);
     Future.microtask(() async {
-
       await fetchUPIIdFromFirestore();
       await getWhatsNew(); // fetch what's new content
       await check();
     });
-    _username=getUsername();
-    _email=getEmail();
-    _uid=getUID();
+    _username = getUsername();
+    _email = getEmail();
+    _uid = getUID();
 
     //
     // _toShow = true;
   }
+
   @override
   Widget build(BuildContext context) {
-    List<Widget> _pages=[
+    List<Widget> _pages = [
       Stack(
         children: [
           Column(
@@ -269,35 +282,39 @@ class _MainUI extends State<MainUI> {
                         const SizedBox(height: 20),
                         AnimatedSwitcher(
                           duration: const Duration(milliseconds: 400),
-                          child:
-                          _upiQrData != null
+                          child: _upiQrData != null
                               ? SizedBox(
-                            width: 250,
-                            child: AnimatedContainer(
-                              duration: Duration(milliseconds: 200),
-                              curve: Curves.fastOutSlowIn,
-                              child: Card(
-                                elevation: 3,
-                                child: PrettyQrView.data(
-                                  key: ValueKey(_upiQrData),
-                                  data: _upiQrData!,
-                                  decoration: PrettyQrDecoration(
-                                    shape: PrettyQrSmoothSymbol(
-                                      color: Theme.of(context).colorScheme.inverseSurface,
+                                  width: 250,
+                                  child: AnimatedContainer(
+                                    duration: Duration(milliseconds: 200),
+                                    curve: Curves.fastOutSlowIn,
+                                    child: Card(
+                                      elevation: 3,
+                                      child: PrettyQrView.data(
+                                        key: ValueKey(_upiQrData),
+                                        data: _upiQrData!,
+                                        decoration: PrettyQrDecoration(
+                                            shape: PrettyQrSmoothSymbol(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .inverseSurface,
+                                            ),
+                                            image:
+                                                const PrettyQrDecorationImage(
+                                                    image: const AssetImage(
+                                                      "assets/icons/icon.png",
+                                                    ),
+                                                    position:
+                                                        PrettyQrDecorationImagePosition
+                                                            .foreground)),
+                                      ),
                                     ),
-                                    image:const PrettyQrDecorationImage(
-                                      image:const AssetImage("assets/icons/icon.png",),
-                                      position: PrettyQrDecorationImagePosition.foreground
-                                    )
                                   ),
-                                ),
-                              ),
-                            ),
-                          )
+                                )
                               : const SizedBox(
-                            key: ValueKey('placeholder'),
-                            height: 250,
-                          ),
+                                  key: ValueKey('placeholder'),
+                                  height: 250,
+                                ),
                         ),
                         const SizedBox(height: 30),
                         TextField(
@@ -376,24 +393,29 @@ class _MainUI extends State<MainUI> {
                 ),
               ),
             ),
-          if(kIsWeb)
+          if (kIsWeb)
             Align(
-              alignment: Alignment.bottomCenter,
-              child: GestureDetector(
-                onTap: () async {
-                  final url = Uri.parse("https://github.com/MrRohanBatra/UPI-QRCODE-MAKER/raw/refs/heads/main/UPI-QR-MAKER/android/app-release.apk");
-                  if (await canLaunchUrl(url)) {
-                    await launchUrl(url, mode: LaunchMode.externalApplication); // or LaunchMode.platformDefault
-                  } else {
-                    // Handle error
-                    print("Could not launch $url");
-                  }
-                },
-                child: Text(
-                  "Want Android App instead of web? Click here",
-                  style: TextStyle(color: Colors.blue, decoration: TextDecoration.underline),
-                ),
-            ))
+                alignment: Alignment.bottomCenter,
+                child: GestureDetector(
+                  onTap: () async {
+                    final url = Uri.parse(
+                        "https://github.com/MrRohanBatra/UPI-QRCODE-MAKER/raw/refs/heads/main/UPI-QR-MAKER/android/app-release.apk");
+                    if (await canLaunchUrl(url)) {
+                      await launchUrl(url,
+                          mode: LaunchMode
+                              .externalApplication); // or LaunchMode.platformDefault
+                    } else {
+                      // Handle error
+                      print("Could not launch $url");
+                    }
+                  },
+                  child: Text(
+                    "Want Android App instead of web? Click here",
+                    style: TextStyle(
+                        color: Colors.blue,
+                        decoration: TextDecoration.underline),
+                  ),
+                ))
         ],
       ),
       Stack(
@@ -411,10 +433,12 @@ class _MainUI extends State<MainUI> {
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 10),
-                Initicon(text: _username!,
-                size: 100,
-                elevation: 0,
-                backgroundColor: Colors.purple,),
+                Initicon(
+                  text: _username!,
+                  size: 100,
+                  elevation: 0,
+                  backgroundColor: Colors.purple,
+                ),
                 const SizedBox(height: 16),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -427,98 +451,112 @@ class _MainUI extends State<MainUI> {
                     const SizedBox(height: 16),
                   ],
                 ),
-                Center(child:
-                AnimatedContainer(
+                Center(
+                    child: AnimatedContainer(
                   duration: Duration(milliseconds: 300),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      ElevatedButton(onPressed: ()async{
-                        _nameController.text=_username!;
-                        showDialog(context: context, builder: (context)=>AlertDialog(
-                          title: Text('Update username'),
-                          content: TextField(
-                            controller: _nameController,
-                            keyboardType: TextInputType.text,
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(),
-                              child: Text('Close'),
+                      ElevatedButton(
+                        onPressed: () async {
+                          _nameController.text = _username!;
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: Text('Update username'),
+                              content: TextField(
+                                controller: _nameController,
+                                keyboardType: TextInputType.text,
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.of(context).pop(),
+                                  child: Text('Close'),
+                                ),
+                                TextButton(
+                                  onPressed: () async {
+                                    print("Updating Username");
+                                    await _user?.updateDisplayName(
+                                        _nameController.text.trim());
+                                    print("Username Updated");
+
+                                    await _user
+                                        ?.reload(); // <- This is important!
+                                    _user = FirebaseAuth.instance.currentUser;
+
+                                    setState(() {
+                                      _username = getUsername();
+                                    });
+
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                            "Successfully Updated Username"),
+                                        backgroundColor: Colors.yellow,
+                                        duration: Duration(milliseconds: 500),
+                                      ),
+                                    );
+
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Text('Confirm'),
+                                ),
+                              ],
                             ),
-                            TextButton(
-                              onPressed: () async {
-                                print("Updating Username");
-                                await _user?.updateDisplayName(_nameController.text.trim());
-                                print("Username Updated");
-
-                                await _user?.reload(); // <- This is important!
-                                _user = FirebaseAuth.instance.currentUser;
-
-                                setState(() {
-                                  _username = getUsername();
-                                });
-
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text("Successfully Updated Username"),
-                                    backgroundColor: Colors.yellow,
-                                    duration: Duration(milliseconds: 500),
+                          );
+                        },
+                        child: Text("Update Username"),
+                      ),
+                      ElevatedButton(
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: Text('New Password'),
+                                content: TextField(
+                                  controller: _passwordController,
+                                  keyboardType: TextInputType.text,
+                                  autofocus: false,
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(),
+                                    child: Text('Close'),
                                   ),
-                                );
+                                  TextButton(
+                                    onPressed: () async {
+                                      Navigator.of(context).pop();
 
-                                Navigator.of(context).pop();
-                              },
-                              child: Text('Confirm'),
-                            ),
-                          ],
-                        ),
-                        );
-                      }, child: Text("Update Username"),),
-                      ElevatedButton(onPressed: (){
-                        showDialog(context: context, builder: (context)=>AlertDialog(
-                          title: Text('New Password'),
-                          content: TextField(
-                            controller: _passwordController,
-                            keyboardType: TextInputType.text,
-                            autofocus: false,
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(),
-                              child: Text('Close'),
-                            ),
-                            TextButton(
-                              onPressed: () async {
-                                Navigator.of(context).pop();
+                                      await _user?.updatePassword(
+                                          _passwordController.text.trim());
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                              "Successfully Updated Password"),
+                                          backgroundColor: Colors.yellow,
+                                          duration: Duration(milliseconds: 500),
+                                        ),
+                                      );
+                                      // await _user?.reload();
 
-                                await _user?.updatePassword(_passwordController.text.trim());
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                      content: Text("Successfully Updated Password"),
-                                    backgroundColor: Colors.yellow,
-                                    duration: Duration(milliseconds: 500),
+                                      // Re-fetch the user to get updated data
+                                      // _user = FirebaseAuth.instance.currentUser;
+
+                                      setState(() {}); // Trigger UI update
+                                    },
+                                    child: Text('Confirm'),
                                   ),
-
-                                );
-                                // await _user?.reload();
-
-                                // Re-fetch the user to get updated data
-                                // _user = FirebaseAuth.instance.currentUser;
-
-                                setState(() {}); // Trigger UI update
-                              },
-                              child: Text('Confirm'),
-                            ),
-                          ],
-                        ),
-                        );
-                      }, child: Text("Change Password")),
+                                ],
+                              ),
+                            );
+                          },
+                          child: Text("Change Password")),
                     ],
                   ),
-                ))
-
-                ,const Divider(height: 40, thickness: 1.5),
+                )),
+                const Divider(height: 40, thickness: 1.5),
 
                 /// 🔹 Developer Info
                 const Text(
@@ -536,7 +574,9 @@ class _MainUI extends State<MainUI> {
                 const Text("Name: Rohan Batra"),
                 const Text("Email: rohanbatra.in@gmail.com"),
                 const Text("Mobile: 9818888495"),
-                const SizedBox(height: 20,),
+                const SizedBox(
+                  height: 20,
+                ),
                 Center(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -547,30 +587,39 @@ class _MainUI extends State<MainUI> {
                       ),
                       GestureDetector(
                         child: const FaIcon(FontAwesomeIcons.linkedin),
-                        onTap: ()async{
-                          final url=Uri.parse("https://www.linkedin.com/in/rohan-batra160705/");
-                          if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+                        onTap: () async {
+                          final url = Uri.parse(
+                              "https://www.linkedin.com/in/rohan-batra160705/");
+                          if (!await launchUrl(url,
+                              mode: LaunchMode.externalApplication)) {
                             throw 'Could not launch $url';
                           }
                         },
                       ),
-                      SizedBox(width: 20,),
+                      SizedBox(
+                        width: 20,
+                      ),
                       GestureDetector(
                         child: const FaIcon(FontAwesomeIcons.github),
-                        onTap: ()async{
-                          final url=Uri.parse("https://www.linkedin.com/in/rohan-batra160705/");
-                          if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+                        onTap: () async {
+                          final url = Uri.parse(
+                              "https://www.linkedin.com/in/rohan-batra160705/");
+                          if (!await launchUrl(url,
+                              mode: LaunchMode.externalApplication)) {
                             throw 'Could not launch $url';
-
                           }
                         },
                       ),
-                      SizedBox(width: 20,),
+                      SizedBox(
+                        width: 20,
+                      ),
                       GestureDetector(
                         child: const FaIcon(FontAwesomeIcons.instagram),
-                        onTap: ()async{
-                          final url =Uri.parse("https://www.instagram.com/rohanbatra1607/");
-                          if(!await launchUrl(url,mode:LaunchMode.externalApplication)){
+                        onTap: () async {
+                          final url = Uri.parse(
+                              "https://www.instagram.com/rohanbatra1607/");
+                          if (!await launchUrl(url,
+                              mode: LaunchMode.externalApplication)) {
                             throw "Could not launch $url";
                           }
                         },
@@ -581,14 +630,18 @@ class _MainUI extends State<MainUI> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 20,),
+                const SizedBox(
+                  height: 20,
+                ),
                 GestureDetector(
-                  child: const Text("🎉 What's New",style: TextStyle(
-                    fontStyle: FontStyle.italic,
-                    fontWeight: FontWeight.bold,
-                    decoration: TextDecoration.underline
-                  ),),
-                  onTap: ()async{
+                  child: const Text(
+                    "🎉 What's New",
+                    style: TextStyle(
+                        fontStyle: FontStyle.italic,
+                        fontWeight: FontWeight.bold,
+                        decoration: TextDecoration.underline),
+                  ),
+                  onTap: () async {
                     await showWhatsNew(context);
                   },
                 ),
@@ -597,17 +650,16 @@ class _MainUI extends State<MainUI> {
           ),
           Align(
             alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  "App Version: $_local",
-                  style: TextStyle(
-                      fontFamily: "monospace",
-                      fontSize: 13,
-                      color: Colors.redAccent
-                  ),
-                ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                "App Version: $_local",
+                style: TextStyle(
+                    fontFamily: "monospace",
+                    fontSize: 13,
+                    color: Colors.redAccent),
               ),
+            ),
           ),
         ],
       )
@@ -623,25 +675,21 @@ class _MainUI extends State<MainUI> {
           ),
         ],
       ),
-      body:SafeArea(
-        top: false,
-        child:_pages[_index]),
+      body: SafeArea(top: false, child: _pages[_index]),
       bottomNavigationBar: BottomNavigationBar(
         enableFeedback: true,
         useLegacyColorScheme: false,
-        selectedLabelStyle: TextStyle(
-          fontWeight: FontWeight.bold
-        ),
+        selectedLabelStyle: TextStyle(fontWeight: FontWeight.bold),
         type: BottomNavigationBarType.fixed,
-        currentIndex:_index ,
-        onTap: (value){
+        currentIndex: _index,
+        onTap: (value) {
           setState(() {
-            _index=value;
+            _index = value;
           });
         },
         items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home),label:"Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.person),label:"About"),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: "About"),
         ],
       ),
     );

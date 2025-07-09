@@ -33,7 +33,10 @@ class DefaultFirebaseOptions {
           'you can reconfigure this by running the FlutterFire CLI again.',
         );
       case TargetPlatform.windows:
-        return windows;
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for windows - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -48,7 +51,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyDDNiAdRpr9_4UPgwAXjgkvhRtSJnN1Azw',
-    appId: '1:276414625228:web:aeb60f3a5b81716d5fd969',
+    appId: '1:276414625228:web:86087c54d32a99a15fd969',
     messagingSenderId: '276414625228',
     projectId: 'flutter-upi',
     authDomain: 'flutter-upi.firebaseapp.com',
@@ -57,18 +60,10 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyAK_LDEYrO4MSdQzN5NT9DUmyoyQh4R90E',
-    appId: '1:276414625228:android:d5811c594c7917365fd969',
+    appId: '1:276414625228:android:893cb600408aad5f5fd969',
     messagingSenderId: '276414625228',
     projectId: 'flutter-upi',
     storageBucket: 'flutter-upi.firebasestorage.app',
   );
 
-  static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyDDNiAdRpr9_4UPgwAXjgkvhRtSJnN1Azw',
-    appId: '1:276414625228:web:b7a2aa9d5370ec0c5fd969',
-    messagingSenderId: '276414625228',
-    projectId: 'flutter-upi',
-    authDomain: 'flutter-upi.firebaseapp.com',
-    storageBucket: 'flutter-upi.firebasestorage.app',
-  );
 }
