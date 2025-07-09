@@ -20,18 +20,19 @@ jobs:
         git clone https://github.com/MrRohanBatra/flutter_upi.git og_repo
         ls og_repo
 
-    - name: Build Flutter Web (Release)
+    - name: Build Flutter Web & APK (Release)
       working-directory: og_repo/flutter_upi
       run: |
         flutter config --enable-web
         flutter pub get
         flutter build web --release
-
+        flutter build apk --release
     - name: Copy Build to Root Repo Folder (UPI-QR-MAKER)
       run: |
         rm -rf og_repo/UPI-QR-MAKER/*
         mkdir -p og_repo/UPI-QR-MAKER
-        cp -r og_repo/flutter_upi/build/web/* og_repo/UPI-QR-MAKER
+        cp -r og_repo/flutter_upi/build/web/* og_repo/UPI-QR-MAKER/web
+        cp -r og_repo/flutter_upi/build/app/outputs/flutter-apk/app-release.apk og_repo/UPI-QR-MAKER/android/
     - name: Commit and Push Build to flutter_upi Repo (og_repo)
       working-directory: og_repo
       run: |
