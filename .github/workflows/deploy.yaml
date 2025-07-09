@@ -64,5 +64,5 @@ jobs:
         git config user.name "Rohan Batra"
         git config user.email "rohanbatra.in@gmail.com"
         git add .
-        git commit -m "🚀 Deploy Flutter Web build to GitHub Pages" || echo "No changes to commit"
-        git push
+       git commit -m "🛠️ Add Flutter Web build to UPI-QR-MAKER folder [skip ci]" || echo "No changes to commit"
+    git push
