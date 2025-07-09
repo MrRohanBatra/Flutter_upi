@@ -57,7 +57,6 @@ jobs:
         rm -rf pages_repo/UPI-QR-MAKER/*
         mkdir -p pages_repo/UPI-QR-MAKER
         cp -r og_repo/flutter_upi/build/web/* pages_repo/UPI-QR-MAKER
-
     - name: Commit and Push to GitHub Pages
       working-directory: pages_repo
       run: |
