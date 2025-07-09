@@ -10,10 +10,14 @@ jobs:
 
     steps:
     - name: Install Git and cURL
-      run: sudo apt-get update && sudo apt-get install -y git curl unzip xz-utils zip
+      run: sudo apt-get update && sudo apt-get install -y git curl unzip xz-utils zip cmake 
 
-    - name: Install Flutter via Snap
-      run: sudo snap install flutter --classic
+    # - name: Install Flutter via Snap
+    #   run: sudo snap install flutter --classic
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.7.2'
 
     - name: Clone Root Repo (flutter_upi)
       run: |
@@ -30,7 +34,8 @@ jobs:
     - name: Copy Build to Root Repo Folder (UPI-QR-MAKER)
       run: |
         rm -rf og_repo/UPI-QR-MAKER/*
-        mkdir -p og_repo/UPI-QR-MAKER
+        mkdir -p og_repo/UPI-QR-MAKER/web
+        mkdir -p og_repo/UPI-QR-MAKER/android
         cp -r og_repo/flutter_upi/build/web/* og_repo/UPI-QR-MAKER/web
         cp -r og_repo/flutter_upi/build/app/outputs/flutter-apk/app-release.apk og_repo/UPI-QR-MAKER/android/
     - name: Commit and Push Build to flutter_upi Repo (og_repo)

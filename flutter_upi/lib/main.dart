@@ -370,11 +370,20 @@ class _MainUI extends State<MainUI> {
             Align(
               alignment: Alignment.bottomCenter,
               child: GestureDetector(
-                onTap: ()async{
-                  final url=Uri.parse("https://raw.githubusercontent.com/MrRohanBatra/UPI-QRCODE-MAKER/refs/heads/main/app_release.apk");
+                onTap: () async {
+                  final url = Uri.parse("https://raw.githubusercontent.com/MrRohanBatra/UPI-QRCODE-MAKER/refs/heads/main/app_release.apk");
+                  if (await canLaunchUrl(url)) {
+                    await launchUrl(url, mode: LaunchMode.externalApplication); // or LaunchMode.platformDefault
+                  } else {
+                    // Handle error
+                    print("Could not launch $url");
+                  }
                 },
-                  child: Text("Want Android App instead of web click here")),
-            )
+                child: Text(
+                  "Want Android App instead of web? Click here",
+                  style: TextStyle(color: Colors.blue, decoration: TextDecoration.underline),
+                ),
+            ))
         ],
       ),
       Stack(
