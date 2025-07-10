@@ -1,0 +1,67 @@
+name: Build and Deploy Flutter Web to Both Repos
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build_web:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.32.5'
+        cache: true
+
+    - name: Checkout flutter_upi repo
+      uses: actions/checkout@v4
+      with:
+        repository: MrRohanBatra/flutter_upi
+        path: og_repo
+        token: ${{ secrets.GH_TOKEN }}
+
+    - name: Build Flutter Web
+      working-directory: og_repo/flutter_upi
+      run: |
+        flutter config --enable-web
+        flutter pub get
+        flutter build web --release
+
+    - name: Copy Web Build to flutter_upi repo
+      run: |
+        rm -rf og_repo/UPI-QR-MAKER/web
+        mkdir -p og_repo/UPI-QR-MAKER/web
+        cp -r og_repo/flutter_upi/build/web/* og_repo/UPI-QR-MAKER/web/
+
+    - name: Commit and Push Web to flutter_upi
+      working-directory: og_repo
+      run: |
+        git config user.name "Rohan Batra"
+        git config user.email "rohanbatra.in@gmail.com"
+        git add UPI-QR-MAKER/web
+        git commit -m "🚀 Add Web build to UPI-QR-MAKER/web [skip ci]" || echo "No changes to commit"
+        git push https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/MrRohanBatra/flutter_upi.git HEAD:main
+
+    - name: Checkout GitHub Pages repo
+      uses: actions/checkout@v4
+      with:
+        repository: MrRohanBatra/mrrohanbatra.github.io
+        path: pages_repo
+        token: ${{ secrets.GH_TOKEN }}
+
+    - name: Copy Web Build to GitHub Pages repo
+      run: |
+        rm -rf pages_repo/UPI-QR-MAKER/web
+        mkdir -p pages_repo/UPI-QR-MAKER/web
+        cp -r og_repo/flutter_upi/build/web/* pages_repo/UPI-QR-MAKER/web/
+
+    - name: Commit and Push Web to GitHub Pages
+      working-directory: pages_repo
+      run: |
+        git config user.name "Rohan Batra"
+        git config user.email "rohanbatra.in@gmail.com"
+        git add UPI-QR-MAKER/web
+        git commit -m "🌐 Deploy Web build to UPI-QR-MAKER/web [skip ci]" || echo "No changes to commit"
+        git push
