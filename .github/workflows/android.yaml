@@ -51,7 +51,9 @@ jobs:
       run: |
         git config user.name "Rohan Batra"
         git config user.email "rohanbatra.in@gmail.com"
+        git stash --include-untracked
         git pull --rebase
+        git stash pop || true
         git add UPI-QR-MAKER/android
         git commit -m "📦 Add APK to UPI-QR-MAKER/android [skip ci]" || echo "No changes to commit"
         git push https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/MrRohanBatra/flutter_upi.git HEAD:main
