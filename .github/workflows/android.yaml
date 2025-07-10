@@ -15,6 +15,19 @@ jobs:
         flutter-version: '3.32.5'
         cache: true
 
+    - name: Cache Gradle and Android build
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.gradle
+          ~/.android
+          og_repo/flutter_upi/.gradle
+          og_repo/flutter_upi/.android
+          og_repo/flutter_upi/build
+        key: ${{ runner.os }}-flutter-apk-${{ hashFiles('**/pubspec.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-flutter-apk-
+
     - name: Checkout flutter_upi repo
       uses: actions/checkout@v4
       with:
@@ -28,17 +41,17 @@ jobs:
         flutter pub get
         flutter build apk --release
 
-    - name: Copy APK to flutter_upi repo
+    - name: Copy APK to flutter_upi repo folder
       run: |
-        rm -rf og_repo/UPI-QR-MAKER/android
         mkdir -p og_repo/UPI-QR-MAKER/android
         cp og_repo/flutter_upi/build/app/outputs/flutter-apk/app-release.apk og_repo/UPI-QR-MAKER/android/
 
-    - name: Commit and Push APK to flutter_upi
+    - name: Commit and Push APK to flutter_upi repo
       working-directory: og_repo
       run: |
         git config user.name "Rohan Batra"
         git config user.email "rohanbatra.in@gmail.com"
+        git pull --rebase
         git add UPI-QR-MAKER/android
         git commit -m "📦 Add APK to UPI-QR-MAKER/android [skip ci]" || echo "No changes to commit"
         git push https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/MrRohanBatra/flutter_upi.git HEAD:main
@@ -52,7 +65,6 @@ jobs:
 
     - name: Copy APK to GitHub Pages repo
       run: |
-        rm -rf pages_repo/UPI-QR-MAKER/android
         mkdir -p pages_repo/UPI-QR-MAKER/android
         cp og_repo/flutter_upi/build/app/outputs/flutter-apk/app-release.apk pages_repo/UPI-QR-MAKER/android/
 
