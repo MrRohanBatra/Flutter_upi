@@ -67,7 +67,7 @@ class MyApp extends StatelessWidget {
                   ],
                 );
               }
-              return const MainUI();
+              return RefreshedUI();
             },
           );
         },
@@ -691,6 +691,84 @@ class _MainUI extends State<MainUI> {
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: "About"),
         ],
+      ),
+    );
+  }
+}
+
+class RefreshedUI extends StatefulWidget {
+  const RefreshedUI({super.key});
+
+  @override
+  State<RefreshedUI> createState() => _RefreshedUIState();
+}
+
+class _RefreshedUIState extends State<RefreshedUI> {
+  final double _iconSize = 26;
+  final _user = FirebaseAuth.instance.currentUser;
+  String get url => _user?.photoURL ?? "null";
+  void _showWhatsNew() {
+    // Show dialog or navigate
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("My QR"),
+        actions: [
+          IconButton(
+            onPressed: _showWhatsNew,
+            icon: Icon(Icons.new_releases_outlined, size: _iconSize),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(right: 12.0),
+            child: CircleAvatar(
+              backgroundImage: NetworkImage(url),
+              // radius: _iconSize,
+            ),
+          ),
+        ],
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            UserAccountsDrawerHeader(
+              accountName: Text(_user?.displayName ?? "User"),
+              accountEmail: Text(_user?.email ?? ""),
+              currentAccountPicture: CircleAvatar(
+                backgroundImage: NetworkImage(url),
+                radius: 40,
+              ),
+            ),
+            ListTile(
+              leading: Icon(Icons.home),
+              title: Text("Home"),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.settings),
+              title: Text("Settings"),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.logout),
+              title: Text("Logout"),
+              onTap: () {
+                FirebaseAuth.instance.signOut();
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+      ),
+      body: Center(
+        child: Text("Main Content"),
       ),
     );
   }
